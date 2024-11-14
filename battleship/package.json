@@ -1,11 +1,11 @@
 {
   "name": "battleship",
   "version": "1.0.0",
-  "description": "NPM BattleShip Game",
+  "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Rich Powell",
+  "author": "",
   "license": "ISC"
 }
