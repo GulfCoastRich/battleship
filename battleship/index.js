@@ -2,86 +2,128 @@ const { table } = require("table");
 const EC = require("eight-colors");
 const RS = require("readline-sync");
 
-const rowLabelArr = ["A", "B", "C", "D", "E", "F"];
-const columnLabelArr = [1, 2, 3, 4, 5, 6];
-const smallBoard = "4x4";
-const mediumBoard = "5x5";
-const largeBoard = "6x6";
-const sizes = [1, 2, 3];
-const rowDefaultObj = { type: "empty", hit: false };
-const smallShip = 2;
-const largeShip = 3;
+const size = 4;
 const type = "type";
 const display = "display";
+const board = [];
 
-function setBoard(boardSize, board){
-  let size = 0;
-  if(boardSize === smallBoard ){
-    size = 4;
-  }else if(boardSize === mediumBoard){
-    size = 5;
-  }else if(boardSize === largeBoard){
-    size = 6;
+function getBoard(size) {
+  for (let i = 0; i < size; i++) {
+    let arr = [];
+    for (let j = 0; j < size; j++) {
+      arr.push({ type: "-", hit: false, display: "-" });
+    }
+    board.push(arr);
   }
 
-  
+  return board;
+}
 
+function addShipsToBoard(size) {
+  let smallShips = 0;
+  let largeShips = 0;
+  let totalShips = 0;
 
+  console.log(`Size = ${size}`);
+  if (size === 4) {
+    smallShips = 1;
+    largeShips = 1;
+    totalShips = 2;
+  } else if (size === 5) {
+    smallShips = 2;
+    largeShips = 1;
+    totalShips = 3;
+  } else if (size === 6) {
+    smallShips = 2;
+    largeShips = 2;
+    totalShips = 4;
+  }
+
+    let choice = rowOrCol();
+    console.log("Choice = " + choice);
+    
+    while(smallShips > 0){
+      placeShip(board, "small", choice);
+      smallShips--;
+    }
+
+    while (largeShips > 0) {
+      placeShip(board, "large", choice);
+      largeShips--;
+    }
+    
+
+  return board;
+}
+
+function getIndex(size) {
+  return Math.floor(Math.random() * size) + 1;
+}
+
+function rowOrCol() {
+  return Math.floor(Math.random() * 2) + 1;
 }
 
 
-const board = [
-  [
-    { type: "🔵", hit: false, display: "-" }, // A0
-    { type: "🔵", hit: false, display: "-" }, // A1
-    { type: "🔵", hit: false, display: "-" }, // A2
-    { type: "-", hit: false, display: "-" }, // A3
-    { type: "-", hit: false, display: "-" }, // A4
-    { type: "-", hit: false, display: "-" }, // A5
-  ],
-  [
-    { type: "-", hit: false, display: "-" }, // B0
-    { type: "-", hit: false, display: "-" }, // B1
-    { type: "-", hit: false, display: "-" }, // B2
-    { type: "🟠", hit: false, display: "-" }, // B3
-    { type: "🟠", hit: false, display: "-" }, // B4
-    { type: "-", hit: false, display: "-" }, // B5
-  ],
-  [
-    { type: "-", hit: false, display: "-" }, // C0
-    { type: "-", hit: false, display: "-" }, // C1
-    { type: "-", hit: false, display: "-" }, // C2
-    { type: "-", hit: false, display: "-" }, // C3
-    { type: "-", hit: false, display: "-" }, // C4
-    { type: "🔵", hit: false, display: "-" }, // C5
-  ],
-  [
-    { type: "🟠", hit: false, display: "-" }, // D0
-    { type: "🟠", hit: false, display: "-" }, // D1
-    { type: "-", hit: false, display: "-" }, // D2
-    { type: "-", hit: false, display: "-" }, // D3
-    { type: "-", hit: false, display: "-" }, // D4
-    { type: "🔵", hit: false, display: "-" }, // D5
-  ],
-  [
-    { type: "-", hit: false, display: "-" }, // E0
-    { type: "-", hit: false, display: "-" }, // E1
-    { type: "-", hit: false, display: "-" }, // E2
-    { type: "-", hit: false, display: "-" }, // E3
-    { type: "-", hit: false, display: "-" }, // E4
-    { type: "🔵", hit: false, display: "-" }, // E5
-  ],
-  [
-    { type: "🔵", hit: false, display: "-" }, // F0
-    { type: "🔵", hit: false, display: "-" }, // F1
-    { type: "🔵", hit: false, display: "-" }, // F2
-    { type: "-", hit: false, display: "-" }, // F3
-    { type: "-", hit: false, display: "-" }, // F4
-    { type: "-", hit: false, display: "-" }, // F5
-  ],
-];
+function placeShip(board, shipType, rowOrCol) {
+  let itemWidth = 0; 
+  let itemHeight = 0; 
+  const rows = board.length;
+  const cols = board[0].length;
+  let symbol = "";
 
-function getValues(board, key){
+  if(shipType === 'small'){
+    symbol += "🟠";
+  }else{
+     symbol += "🔵";
+  }
+
+  //determine the direction and size of the ship placement
+  if (shipType == "small" && rowOrCol === 1) {
+    itemWidth = 1;
+    itemHeight = 2;
+  } else if (shipType == "small" && rowOrCol === 2) {
+    itemWidth = 2;
+    itemHeight = 1;
+  } else if (shipType == "large" && rowOrCol === 1) {
+    itemWidth = 1;
+    itemHeight = 3;
+  } else if (shipType == "large" && rowOrCol === 2) {
+    itemWidth = 3;
+    itemHeight = 1;
+  }
+
+  while (true) {
+    // Generate random coordinates within the grid
+    const x = Math.floor(Math.random() * (cols - itemWidth));
+    const y = Math.floor(Math.random() * (rows - itemHeight));
+
+    // Check for overlap
+    let overlap = false;
+    for (let i = y; i < y + itemHeight; i++) {
+      for (let j = x; j < x + itemWidth; j++) {
+        if (board[i][j].type !== '-') {
+          overlap = true;
+          break;
+        }
+      }
+      if (overlap) break;
+    }
+
+    // If no overlap, place the item
+    if (!overlap) {
+      for (let i = y; i < y + itemHeight; i++) {
+        for (let j = x; j < x + itemWidth; j++) {
+          board[i][j].type = symbol; // Set type as occupied
+        }
+      }
+      return board;
+    }
+  }
+}
+
+//Will return board object values based on key
+function getValues(board, key) {
   let values = [];
   for (let i = 0; i < board.length; i++) {
     let val = [];
@@ -93,39 +135,77 @@ function getValues(board, key){
   return values;
 }
 
-function printBoard(debug) {
-
-  if(debug){
-    console.log(debug);
-    let values = getValues(board, type);
-    console.table({
-      A: values[0],
-      B: values[1],
-      C: values[2],
-      D: values[3],
-      E: values[4],
-      F: values[5],
-    });
-
-  }else{
-     console.log(debug);
-     let values = getValues(board, display);
-     console.table({
-       A: values[0],
-       B: values[1],
-       C: values[2],
-       D: values[3],
-       E: values[4],
-       F: values[5],
-     });
+function printBoard(size, debug) {
+  if (size === 4) {
+    if (debug) {
+      console.log(debug);
+      let values = getValues(board, type);
+      console.table({
+        A: values[0],
+        B: values[1],
+        C: values[2],
+        D: values[3],
+      });
+    } else {
+      console.log(debug);
+      let values = getValues(board, display);
+      console.table({
+        A: values[0],
+        B: values[1],
+        C: values[2],
+        D: values[3],
+      });
+    }
+  } else if (size === 5) {
+    if (debug) {
+      console.log(debug);
+      let values = getValues(board, type);
+      console.table({
+        A: values[0],
+        B: values[1],
+        C: values[2],
+        D: values[3],
+        E: values[4],
+      });
+    } else {
+      console.log(debug);
+      let values = getValues(board, display);
+      console.table({
+        A: values[0],
+        B: values[1],
+        C: values[2],
+        D: values[3],
+        E: values[4],
+      });
+    }
+  } else if (size === 6) {
+    if (debug) {
+      console.log(debug);
+      let values = getValues(board, type);
+      console.table({
+        A: values[0],
+        B: values[1],
+        C: values[2],
+        D: values[3],
+        E: values[4],
+        F: values[5],
+      });
+    } else {
+      console.log(debug);
+      let values = getValues(board, display);
+      console.table({
+        A: values[0],
+        B: values[1],
+        C: values[2],
+        D: values[3],
+        E: values[4],
+        F: values[5],
+      });
+    }
   }
 }
 
-
-
-printBoard(false);
-
-
- 
-  
- 
+getBoard(size);
+printBoard(size, false);
+addShipsToBoard(size);
+printBoard(size, true);
