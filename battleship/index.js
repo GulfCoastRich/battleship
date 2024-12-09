@@ -142,7 +142,6 @@ function getValues(board, key) {
 function printBoard(size, debug) {
   if (size === 4) {
     if (debug) {
-      console.log(debug);
       let values = getValues(board, type);
       console.table({
         A: values[0],
@@ -151,7 +150,6 @@ function printBoard(size, debug) {
         D: values[3],
       });
     } else {
-      console.log(debug);
       let values = getValues(board, display);
       console.table({
         A: values[0],
@@ -162,7 +160,6 @@ function printBoard(size, debug) {
     }
   } else if (size === 5) {
     if (debug) {
-      console.log(debug);
       let values = getValues(board, type);
       console.table({
         A: values[0],
@@ -172,7 +169,6 @@ function printBoard(size, debug) {
         E: values[4],
       });
     } else {
-      console.log(debug);
       let values = getValues(board, display);
       console.table({
         A: values[0],
@@ -184,7 +180,6 @@ function printBoard(size, debug) {
     }
   } else if (size === 6) {
     if (debug) {
-      console.log(debug);
       let values = getValues(board, type);
       console.table({
         A: values[0],
@@ -195,7 +190,6 @@ function printBoard(size, debug) {
         F: values[5],
       });
     } else {
-      console.log(debug);
       let values = getValues(board, display);
       console.table({
         A: values[0],
@@ -224,7 +218,8 @@ function getSize() {
   return size;
 }
 
-function guess(size) {
+function guess(size, board) {
+  console.log("Size = " + size);
   let guessCoordinate = RS.question("Please guess a coordinate");
   console.log(`guessCoordinate = ${guessCoordinate}`);
   console.log("Size = " + size);
@@ -245,21 +240,22 @@ function guess(size) {
   console.log("Board = " + board);
 
   if(isValid){
-    for (let row of board) {
-      for (let obj of row) {
+    for (let i = 0; i < board.length; i++) {
+      for (let obj of board[i]) {
         if (obj.id === guessCoordinate && obj.hit === false && obj.type === "-") {
-          console.log(guess);
-          console.log(obj.id);
-          console.log(obj.hit);
-          console.log(obj.display);
+          console.log("Guess " + guessCoordinate);
+          console.log("ID = " + obj.id);
+          console.log("Hit = " + obj.hit);
+          console.log("Display = " + obj.display);
           obj.display = "❌"; // Change the display value
           obj.hit = true;
           correct = false;
           break; // Exit the inner loop once the object is found and updated
-        }else if (obj.id === guess && obj.hit === false) {
-          console.log(obj.id);
-          console.log(obj.hit);
-          console.log(obj.display);
+        }else if (obj.id === guessCoordinate && obj.hit === false && obj.type === "🟠" || obj.type === "🔵") {
+           console.log("Guess " + guessCoordinate);
+           console.log("ID = " + obj.id);
+           console.log("Hit = " + obj.hit);
+           console.log("Display = " + obj.display);
            obj.display = obj.type;
            obj.hit = true;
            correct = true;
@@ -277,9 +273,6 @@ function guess(size) {
     console.log("Miss!!!");
   }
 
-  
-  
-
 }
 
 console.log("How Many Ships per Board Size");
@@ -295,13 +288,6 @@ printBoard(size, false);
 addShipsToBoard(size);
 printBoard(size, true);
 printBoard(size, false);
-guess(size);
+guess(size, board);
 printBoard(size, false);
-guess(size);
-printBoard(size, false);
-guess(size);
-printBoard(size, false);
-guess(size);
-printBoard(size, false);
-guess(size);
-printBoard(size, false);
+guess(size, board);
