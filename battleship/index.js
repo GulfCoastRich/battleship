@@ -1,17 +1,25 @@
+const { checkbox, Separator } = require("@inquirer/prompts");
 const { table } = require("table");
 const EC = require("eight-colors");
 const RS = require("readline-sync");
 
-const size = 4;
 const type = "type";
 const display = "display";
+const sizes = [4, 5, 6];
+let size = 0;
 const board = [];
 
 function getBoard(size) {
   for (let i = 0; i < size; i++) {
     let arr = [];
     for (let j = 0; j < size; j++) {
-      arr.push({ type: "-", hit: false, display: "-" });
+      let alphaArr = ["A", "B", "C", "D", "E", "F"];
+      arr.push({
+        id: `${alphaArr[i]}${j}`,
+        type: "-",
+        hit: false,
+        display: "-",
+      });
     }
     board.push(arr);
   }
@@ -24,7 +32,6 @@ function addShipsToBoard(size) {
   let largeShips = 0;
   let totalShips = 0;
 
-  console.log(`Size = ${size}`);
   if (size === 4) {
     smallShips = 1;
     largeShips = 1;
@@ -39,19 +46,17 @@ function addShipsToBoard(size) {
     totalShips = 4;
   }
 
-    let choice = rowOrCol();
-    console.log("Choice = " + choice);
-    
-    while(smallShips > 0){
-      placeShip(board, "small", choice);
-      smallShips--;
-    }
+  let choice = rowOrCol();
 
-    while (largeShips > 0) {
-      placeShip(board, "large", choice);
-      largeShips--;
-    }
-    
+  while (smallShips > 0) {
+    placeShip(board, "small", choice);
+    smallShips--;
+  }
+
+  while (largeShips > 0) {
+    placeShip(board, "large", choice);
+    largeShips--;
+  }
 
   return board;
 }
@@ -64,18 +69,17 @@ function rowOrCol() {
   return Math.floor(Math.random() * 2) + 1;
 }
 
-
 function placeShip(board, shipType, rowOrCol) {
-  let itemWidth = 0; 
-  let itemHeight = 0; 
+  let itemWidth = 0;
+  let itemHeight = 0;
   const rows = board.length;
   const cols = board[0].length;
   let symbol = "";
 
-  if(shipType === 'small'){
+  if (shipType === "small") {
     symbol += "🟠";
-  }else{
-     symbol += "🔵";
+  } else {
+    symbol += "🔵";
   }
 
   //determine the direction and size of the ship placement
@@ -102,7 +106,7 @@ function placeShip(board, shipType, rowOrCol) {
     let overlap = false;
     for (let i = y; i < y + itemHeight; i++) {
       for (let j = x; j < x + itemWidth; j++) {
-        if (board[i][j].type !== '-') {
+        if (board[i][j].type !== "-") {
           overlap = true;
           break;
         }
@@ -205,7 +209,99 @@ function printBoard(size, debug) {
   }
 }
 
+function getSize() {
+  let choice = RS.keyInSelect(sizes, "Choose a board size)") + 1;
+  if (choice === 1) {
+    size = 4;
+  } else if (choice === 2) {
+    size = 5;
+  } else if (choice === 3) {
+    size = 6;
+  } else if (choice === 0) {
+    console.clear();
+    getSize();
+  }
+  return size;
+}
+
+function guess(size) {
+  let guessCoordinate = RS.question("Please guess a coordinate");
+  console.log(`guessCoordinate = ${guessCoordinate}`);
+  console.log("Size = " + size);
+  let isValid = false;
+  const regex4 = /[A-D)][0-3]/i;
+  const regex5 = /[A-E][0-4]/i;
+  const regex6 = /[A-F][0-5]/i;
+  let correct = false;
+
+  if(size === 4){
+    isValid = regex4.test(guessCoordinate);
+  }else if(size === 5) {
+     isValid = regex5.test(guessCoordinate);
+  }else if(size === 6) {
+     isValid = regex6.test(guessCoordinate);
+  }
+  console.log("Is valid = " + isValid);
+  console.log("Board = " + board);
+
+  if(isValid){
+    for (let row of board) {
+      for (let obj of row) {
+        if (obj.id === guessCoordinate && obj.hit === false && obj.type === "-") {
+          console.log(guess);
+          console.log(obj.id);
+          console.log(obj.hit);
+          console.log(obj.display);
+          obj.display = "❌"; // Change the display value
+          obj.hit = true;
+          correct = false;
+          break; // Exit the inner loop once the object is found and updated
+        }else if (obj.id === guess && obj.hit === false) {
+          console.log(obj.id);
+          console.log(obj.hit);
+          console.log(obj.display);
+           obj.display = obj.type;
+           obj.hit = true;
+           correct = true;
+           break;
+        }
+      }
+    }
+  }else{
+    console.log("Sorry, that is not a valid guess.");
+  }
+
+  if (correct) {
+    console.log("Hit!!!");
+  } else {
+    console.log("Miss!!!");
+  }
+
+  
+  
+
+}
+
+console.log("How Many Ships per Board Size");
+console.log("4x4: \n [] 1 large \n [] 1 small");
+console.log("5x5: \n [] 1 large \n [] 2 small");
+console.log("6x6: \n [] 2 large \n [] 2 small");
+console.log("Welcome to Battleship 🚢");
+
+size = getSize();
+console.log("Size = " + size);
 getBoard(size);
 printBoard(size, false);
 addShipsToBoard(size);
 printBoard(size, true);
+printBoard(size, false);
+guess(size);
+printBoard(size, false);
+guess(size);
+printBoard(size, false);
+guess(size);
+printBoard(size, false);
+guess(size);
+printBoard(size, false);
+guess(size);
+printBoard(size, false);
