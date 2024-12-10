@@ -1,6 +1,8 @@
 # Battleship 
 
 ## To Start the Game: 
+Download the main repo.
+In your terminal, navigate to the battleship file. 
 Run the following command: 
 npm run start-game
 
