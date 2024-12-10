@@ -2,14 +2,50 @@ const { checkbox, Separator } = require("@inquirer/prompts");
 const { table } = require("table");
 const EC = require("eight-colors");
 const RS = require("readline-sync");
+var figlet = require("figlet");
 
 const type = "type";
 const display = "display";
-const sizes = [4, 5, 6];
+const sizes = ['4x4', '5x5', '6x6'];
 let size = 0;
-const board = [];
+let board = [];
 
-function getBoard(size) {
+function startGame() {
+  board = [];
+  console.clear();
+  console.log("The Amount of Ships per Board Size");
+  console.log("4x4: \n [] 1 large \n [] 1 small");
+  console.log("5x5: \n [] 1 large \n [] 2 small");
+  console.log("6x6: \n [] 2 large \n [] 2 small");
+  console.log("");
+  console.log("");
+  console.log("Welcome to Battleship 🚢");
+
+  function getSize() {
+    let choice = RS.keyInSelect(sizes, "Choose a board size)") + 1;
+    if (choice === 1) {
+      size = 4;
+    } else if (choice === 2) {
+      size = 5;
+    } else if (choice === 3) {
+      size = 6;
+    } else if (choice === 0) {
+      console.clear();
+      startGame();
+    }
+    return size;
+  }
+
+  size = getSize();
+  createBoard(size);
+  addShipsToBoard(size);
+  console.clear();
+  console.log("The board is ready for play!");
+  printBoard(size, false);
+  guess(size);
+}
+
+function createBoard(size) {
   for (let i = 0; i < size; i++) {
     let arr = [];
     for (let j = 0; j < size; j++) {
@@ -23,14 +59,11 @@ function getBoard(size) {
     }
     board.push(arr);
   }
-
-  return board;
 }
 
 function addShipsToBoard(size) {
   let smallShips = 0;
   let largeShips = 0;
-  let totalShips = 0;
 
   if (size === 4) {
     smallShips = 1;
@@ -57,12 +90,6 @@ function addShipsToBoard(size) {
     placeShip(board, "large", choice);
     largeShips--;
   }
-
-  return board;
-}
-
-function getIndex(size) {
-  return Math.floor(Math.random() * size) + 1;
 }
 
 function rowOrCol() {
@@ -203,91 +230,96 @@ function printBoard(size, debug) {
   }
 }
 
-function getSize() {
-  let choice = RS.keyInSelect(sizes, "Choose a board size)") + 1;
-  if (choice === 1) {
-    size = 4;
-  } else if (choice === 2) {
-    size = 5;
-  } else if (choice === 3) {
-    size = 6;
-  } else if (choice === 0) {
-    console.clear();
-    getSize();
-  }
-  return size;
-}
-
-function guess(size, board) {
-  console.log("Size = " + size);
-  let guessCoordinate = RS.question("Please guess a coordinate");
-  console.log(`guessCoordinate = ${guessCoordinate}`);
-  console.log("Size = " + size);
+function guess(size) {
+  let guessCoordinate = RS.question("Please guess a coordinate: ");
   let isValid = false;
   const regex4 = /[A-D)][0-3]/i;
   const regex5 = /[A-E][0-4]/i;
   const regex6 = /[A-F][0-5]/i;
-  let correct = false;
 
-  if(size === 4){
+  if (size === 4) {
     isValid = regex4.test(guessCoordinate);
-  }else if(size === 5) {
-     isValid = regex5.test(guessCoordinate);
-  }else if(size === 6) {
-     isValid = regex6.test(guessCoordinate);
+  } else if (size === 5) {
+    isValid = regex5.test(guessCoordinate);
+  } else if (size === 6) {
+    isValid = regex6.test(guessCoordinate);
   }
-  console.log("Is valid = " + isValid);
-  console.log("Board = " + board);
 
-  if(isValid){
-    for (let i = 0; i < board.length; i++) {
-      for (let obj of board[i]) {
-        if (obj.id === guessCoordinate && obj.hit === false && obj.type === "-") {
-          console.log("Guess " + guessCoordinate);
-          console.log("ID = " + obj.id);
-          console.log("Hit = " + obj.hit);
-          console.log("Display = " + obj.display);
-          obj.display = "❌"; // Change the display value
+  let guessUpper = guessCoordinate.replace(
+    /([a-zA-Z])(\d)/g,
+    function (match, letter, number) {
+      return letter.toUpperCase() + number;
+    }
+  );
+
+  if (isValid) {
+    for (const el of board) {
+      for (const obj of el) {
+        if (guessUpper === obj.id && obj.type === "🟠" && obj.hit === false) {
+          obj.display = "🟠";
           obj.hit = true;
-          correct = false;
-          break; // Exit the inner loop once the object is found and updated
-        }else if (obj.id === guessCoordinate && obj.hit === false && obj.type === "🟠" || obj.type === "🔵") {
-           console.log("Guess " + guessCoordinate);
-           console.log("ID = " + obj.id);
-           console.log("Hit = " + obj.hit);
-           console.log("Display = " + obj.display);
-           obj.display = obj.type;
-           obj.hit = true;
-           correct = true;
-           break;
+        }else if (guessUpper === obj.id && obj.type === "🔵" && obj.hit === false) {
+          obj.display = "🔵";
+          obj.hit = true;
+        }else if (guessUpper === obj.id && obj.type === "-" && obj.hit === false) {
+          obj.display = "❌";
+          obj.hit = true;
         }
       }
     }
   }else{
-    console.log("Sorry, that is not a valid guess.");
+    console.log("That is not a valid guess. Please try again");
+    guess(size);
   }
 
-  if (correct) {
-    console.log("Hit!!!");
-  } else {
-    console.log("Miss!!!");
+  if(isGameOver(board)){
+    console.clear();
+    endGame();
+  }else{
+    console.clear();
+    printBoard(size, false);
+    guess(size);
   }
-
 }
 
-console.log("How Many Ships per Board Size");
-console.log("4x4: \n [] 1 large \n [] 1 small");
-console.log("5x5: \n [] 1 large \n [] 2 small");
-console.log("6x6: \n [] 2 large \n [] 2 small");
-console.log("Welcome to Battleship 🚢");
 
-size = getSize();
-console.log("Size = " + size);
-getBoard(size);
-printBoard(size, false);
-addShipsToBoard(size);
-printBoard(size, true);
-printBoard(size, false);
-guess(size, board);
-printBoard(size, false);
-guess(size, board);
+function isGameOver(board){
+  const arr = [];
+  for (const el of board) {
+    for (const obj of el) {
+      if (obj.type === "🟠" || obj.type === "🔵") {
+       arr.push(obj);
+      } 
+    }
+  }
+
+  if(arr.some((obj) => obj.hit === false)){
+      return false;
+  }else{
+    return true;
+  }
+ 
+}
+
+function endGame() {
+  if (board) {
+    console.log(`=============================================
+__   _______ _   _   _    _ _____ _   _
+\\ \\ / /  _  | | | | | |  | |_   _| \\ | |
+ \\ V /| | | | | | | | |  | | | | |  \\| |
+  \\ / | | | | | | | | |/\\| | | | | . ' |
+  | | \\ \\_/ / |_| | \\  /\\  /_| |_| |\\  |
+  \\_/  \\___/ \\___/   \\/  \\/ \\___/\\_| \\_/
+  
+=============================================`);
+  }
+  const playAgain = RS.keyInYN("Would you like to play again?");
+  if(playAgain){
+    startGame();
+  }else{
+    console.clear();
+  }
+};
+
+startGame();
+
