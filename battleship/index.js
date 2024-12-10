@@ -1,8 +1,8 @@
-const { checkbox, Separator } = require("@inquirer/prompts");
+
 const { table } = require("table");
 const EC = require("eight-colors");
 const RS = require("readline-sync");
-var figlet = require("figlet");
+
 
 const type = "type";
 const display = "display";
