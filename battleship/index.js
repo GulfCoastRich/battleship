@@ -3,7 +3,6 @@ const { table } = require("table");
 const EC = require("eight-colors");
 const RS = require("readline-sync");
 
-
 const type = "type";
 const display = "display";
 const sizes = ['4x4', '5x5', '6x6'];
@@ -145,7 +144,7 @@ function placeShip(board, shipType, rowOrCol) {
     if (!overlap) {
       for (let i = y; i < y + itemHeight; i++) {
         for (let j = x; j < x + itemWidth; j++) {
-          board[i][j].type = symbol; // Set type as occupied
+          board[i][j].type = symbol; 
         }
       }
       return board;
@@ -321,5 +320,8 @@ __   _______ _   _   _    _ _____ _   _
   }
 };
 
-startGame();
 
+
+module.exports = {
+  startGame,
+};
